@@ -160,7 +160,9 @@ export default function Home() {
                 ? "Processing..."
                 : timeLeft > 0
                 ? `Claim in ${formatTime(timeLeft)}`
-                : "Claim Now"}
+                : `Claim Now (Day ${
+                    claimInfo.streak_reset ? 1 : Number(claimInfo.current_streak) + 1
+                  })`}
             </Button>
           </div>
         ) : (

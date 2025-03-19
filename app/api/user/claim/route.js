@@ -61,7 +61,8 @@ export async function GET(request) {
       Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
     );
 
-    let streak = user.claim_streak || 0;
+    let newStreak;
+    let streakWillReset = false;
     if (user.last_claim_time) {
       const lastClaimDate = new Date(user.last_claim_time);
       const lastClaimMidnight = new Date(
@@ -73,14 +74,22 @@ export async function GET(request) {
       );
 
       const diffDays = (todayUTC - lastClaimMidnight) / (1000 * 60 * 60 * 24);
-      if (diffDays >= 1) {
-        streak = user.claim_streak + 1;
+      if (diffDays === 1) {
+        // مطالبة متتالية صحيحة
+        newStreak = user.claim_streak + 1;
+      } else if (diffDays > 1) {
+        // إذا مر يوم كامل أو أكثر دون مطالبة، تعاد قيمة الستريك إلى 0
+        newStreak = 0;
+        streakWillReset = true;
+      } else {
+        // في نفس اليوم لم تحدث مطالبة جديدة
+        newStreak = user.claim_streak;
       }
     } else {
-      streak = 1;
+      newStreak = 1;
     }
 
-    const claimPoints = streak >= 14 ? 1000 : calculateClaimPoints(streak);
+    const claimPoints = newStreak >= 14 ? 1000 : calculateClaimPoints(newStreak);
 
     let nextClaimDate;
     if (user.last_claim_time) {
@@ -104,9 +113,11 @@ export async function GET(request) {
       JSON.stringify({
         telegram_id,
         current_streak: user.claim_streak || 0,
+        new_streak: newStreak,
         next_claim_points: claimPoints,
-        remaining_until_max: streak >= 14 ? 0 : 1000 - claimPoints,
+        remaining_until_max: newStreak >= 14 ? 0 : 1000 - claimPoints,
         next_claim_time: nextClaimTime,
+        streak_reset: streakWillReset, // خانة إضافية توضح إذا كانت الستريك ستعود لـ0
       }),
       {
         status: 200,

@@ -71,7 +71,7 @@ export async function fetchClaimData() {
   }
 }
 
-export async function fetchUserReferralsData(telegramId) {
+export async function fetchReferralsData(telegramId) {
   try {
     const { initDataRaw } = retrieveLaunchParams();
 
@@ -84,7 +84,7 @@ export async function fetchUserReferralsData(telegramId) {
       headers['telegramid'] = telegramId;
     }
 
-    const response = await fetch(`${API_BASE_URL}/user/referral`, {
+    const response = await fetch(`${API_BASE_URL}/user/referrals`, {
       method: 'GET',
       headers,
     });

@@ -6,6 +6,7 @@ import { Avatar, Card, CardBody, Code, Tab, Tabs } from '@heroui/react';
 import { FaRegCopy, FaCheck } from "react-icons/fa6";
 import Image from 'next/image';
 import { useState } from 'react';
+import ReferralsTable from "@/components/profile/referralsTable";
 
 export default function Home() {
   const { userData } = useUser();
@@ -74,13 +75,19 @@ export default function Home() {
 
       <Tabs aria-label="Tabs variants" variant={"bordered"} className="mt-4">
           <Tab key="history" title="History" >
-            <Card>
+            <Card className="mb-20">
               <CardBody>
                 <HistoryTable history={userData?.history} />
               </CardBody>
             </Card>
           </Tab>
-          <Tab key="referrals" title="Referrals" />
+          <Tab key="referrals" title="Referrals" >
+          <Card className="mb-20">
+              <CardBody>
+                <ReferralsTable />
+              </CardBody>
+            </Card>
+          </Tab>
       </Tabs>
     </div>
   );
