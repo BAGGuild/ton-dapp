@@ -11,7 +11,7 @@ export default function Home() {
   const { userData } = useUser();
   const [isCopied, setIsCopied] = useState(false);
 
-  const referralLink = `https://t.me/BagDappBot/dapp?startapp=${userData.ref_code}`;
+  const referralLink = `https://t.me/BagDappBot/Dapp?startapp=${userData.ref_code}`;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink);
