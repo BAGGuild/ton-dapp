@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
+.navbarBackground {
+  background-image: url("https://nextui.org/gradients/docs-right.png");
+  background-size: cover;
+  background-position: center;
+}
