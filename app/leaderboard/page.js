@@ -32,7 +32,7 @@ export default function Home() {
           <Spinner variant="dots" />
         </div>
       ) : (
-        <div className="w-full space-y-4">
+        <div className="w-full space-y-4 mb-20">
           {leaderboard.map((entry) => (
             <Card key={entry.ranking} className="">
               <CardBody>

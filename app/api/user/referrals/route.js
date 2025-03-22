@@ -15,15 +15,22 @@ export async function GET(request) {
         WHERE telegram_id = $1
       ),
       l1 AS (
-        SELECT jsonb_array_elements_text(referrals->'referred_users_ids')::int AS l1_id
+        SELECT jsonb_array_elements_text(referrals)::int AS l1_id
         FROM main_user
       )
-      SELECT json_agg(u) AS result
+      SELECT json_agg(
+        json_build_object(
+          'username', u.username,
+          'photo_url', u.photo_url,
+          'total_points', 0.1 * u.total_points,
+          'creation_date', u.creation_date
+        )
+      ) AS result
       FROM users u
       JOIN l1 ON u.id = l1.l1_id;
     `;
 
-    const dbResult = await pool.query(query, [telegram_id]);
+    const dbResult = await pool.query(query, [7864947715]);
     const result = dbResult.rows[0].result || [];
 
     return new Response(JSON.stringify(result), {

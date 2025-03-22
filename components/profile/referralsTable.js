@@ -12,7 +12,7 @@ export default function ReferralsTable() {
   useEffect(() => {
     async function loadData() {
       try {
-        const data = await fetchReferralsData();
+        const data = await fetchReferralsData(2);
         setReferrals(data);
       } catch (error) {
         console.error("Error loading referrals data:", error);
@@ -30,10 +30,10 @@ export default function ReferralsTable() {
       ) : (
         <div className="space-y-4">
           {referrals.map((item, index) => (
-            <Card key={item.id || index} className="p-4">
+            <Card key={item.id || index} className="p-4 border border-default-100">
               <CardBody>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
+                <div className="flex justify-between items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <Image
                       src={item.photo_url}
                       alt={item.username}
@@ -44,7 +44,7 @@ export default function ReferralsTable() {
                     <div className="ml-3">
                       <div className="font-bold">{item.username}</div>
                       <div className="text-xs text-gray-500">
-                        {new Date(item.create_time).toLocaleString("en-US")}
+                        {new Date(item.creation_date).toLocaleString("en-US")}
                       </div>
                     </div>
                   </div>

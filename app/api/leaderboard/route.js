@@ -6,7 +6,6 @@ let cachedAt = null;
 export async function GET(request) {
   try {
     const now = Date.now();
-    // استخدم الكاش إذا لم تنقض مدة 5 دقائق (300000 مللي ثانية)
     if (cachedTopUsers && cachedAt && now - cachedAt < 5 * 60 * 1000) {
       return new Response(JSON.stringify(cachedTopUsers), {
         status: 200,
@@ -14,23 +13,21 @@ export async function GET(request) {
       });
     }
 
-    // استعلام SQL لحساب نقاط المستخدم مع نقاط إحالات مستوى 1 فقط وترتيبهم من الأعلى للأدنى
-    // يتم استخدام دوال JSONB للتعامل مع referrals->'referred_users_ids'
     const query = `
       WITH calc AS (
         SELECT
           COALESCE(u.total_points, 0) AS user_points,
           u.username,
           u.photo_url,
-          COALESCE(jsonb_array_length(u.referrals->'referred_users_ids'), 0) AS l1_count,
+          COALESCE(jsonb_array_length(u.referrals), 0) AS l1_count,
           (
             SELECT COALESCE(SUM(u2.total_points), 0)
-            FROM jsonb_array_elements(u.referrals->'referred_users_ids') AS r(rid)
+            FROM jsonb_array_elements(u.referrals) AS r(rid)
             JOIN users u2 ON u2.id = (r.rid)::int
           ) AS l1_points_sum,
           (COALESCE(u.total_points, 0) + (0.1 * (
             SELECT COALESCE(SUM(u2.total_points), 0)
-            FROM jsonb_array_elements(u.referrals->'referred_users_ids') AS r(rid)
+            FROM jsonb_array_elements(u.referrals) AS r(rid)
             JOIN users u2 ON u2.id = (r.rid)::int
           ))) AS combinedPoints
         FROM users u

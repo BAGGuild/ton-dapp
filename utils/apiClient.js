@@ -83,7 +83,7 @@ export async function fetchReferralsData(telegramId) {
     if (telegramId) {
       headers['telegramid'] = telegramId;
     }
-
+    
     const response = await fetch(`${API_BASE_URL}/user/referrals`, {
       method: 'GET',
       headers,
