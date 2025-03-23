@@ -53,6 +53,8 @@ export function middleware(request) {
 
     const authDate = parseInt(params.get('auth_date'), 10);
     const currentTime = Math.floor(Date.now() / 1000);
+
+    console.log('Auth date:', authDate, 'Current time:', currentTime);
     if (currentTime - authDate > 60 * 60 * 48) {
       console.log('Data is outdated:', currentTime, authDate);
       return NextResponse.json({ error: 'Data is outdated' }, { status: 403 });
