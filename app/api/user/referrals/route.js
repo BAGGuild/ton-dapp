@@ -30,7 +30,7 @@ export async function GET(request) {
       JOIN l1 ON u.id = l1.l1_id;
     `;
 
-    const dbResult = await pool.query(query, [7864947715]);
+    const dbResult = await pool.query(query, [telegram_id]);
     const result = dbResult.rows[0].result || [];
 
     return new Response(JSON.stringify(result), {
