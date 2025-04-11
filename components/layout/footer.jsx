@@ -3,11 +3,13 @@
 import React, { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { AiOutlineTrophy, AiOutlineUser } from 'react-icons/ai';
+import { PiCoinsThin } from "react-icons/pi";
 import { IoHomeOutline } from "react-icons/io5";
 
 const menuItems = [
   { name: 'Home', path: '/', icon: <IoHomeOutline size={24} /> },
-  { name: 'LeaderBoard', path: '/leaderboard', icon: <AiOutlineTrophy size={24} /> },
+  { name: 'Leaders', path: '/leaderboard', icon: <AiOutlineTrophy size={24} /> },
+  { name: 'Earn', path: '/Tasks', icon: <PiCoinsThin size={24} /> },
   { name: 'Profile', path: '/profile', icon: <AiOutlineUser size={24} /> },
 ];
 
