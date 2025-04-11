@@ -38,15 +38,13 @@ async function insertUser({
 async function updateReferrer(startParam, newUserId) {
   const updateQuery = `
     UPDATE users
-    SET referrals = 
-      CASE 
-        WHEN referrals @> jsonb_build_array($1) THEN referrals 
-        ELSE referrals || jsonb_build_array($1)
-      END
-    WHERE ref_code = $2;
+    SET referrals = referrals || to_jsonb($1::text)
+    WHERE ref_code = $2
+    AND NOT referrals ? $1;
   `;
   await pool.query(updateQuery, [newUserId, startParam]);
 }
+
 
 export async function POST(request) {
   try {
