@@ -13,29 +13,24 @@ const rewards = [
   { label: "🎉 Surprise", type: "legendary" },
 ];
 
-// Define probability for each type
 const rewardProbabilities = {
-  normal: 70, // 70% chance for normal
-  rare: 20, // 20% chance for rare
-  legendary: 10, // 10% chance for legendary
+  normal: 98,
+  rare: 1.999,
+  legendary: 0.001,
 };
 
-// Helper function to select item based on probability
 const getRandomReward = () => {
-  // Generate a random number between 1 and 100
   const randomNum = Math.random() * 100;
-
   let cumulativeProbability = 0;
-  // Iterate over the reward types and assign probability ranges
   for (const [type, probability] of Object.entries(rewardProbabilities)) {
     cumulativeProbability += probability;
     if (randomNum <= cumulativeProbability) {
-      // Select a reward from the corresponding type
       const filteredRewards = rewards.filter((reward) => reward.type === type);
       const randomReward = filteredRewards[Math.floor(Math.random() * filteredRewards.length)];
       return randomReward;
     }
   }
+  return rewards[0]; // Fallback
 };
 
 export default function SpinPage() {
@@ -44,6 +39,7 @@ export default function SpinPage() {
   const [spinning, setSpinning] = useState(false);
   const [reveal, setReveal] = useState(false);
   const [buttonDisabled, setButtonDisabled] = useState(false);
+  const [showStaticRewards, setShowStaticRewards] = useState(true);
 
   const itemWidth = 130;
   const itemMargin = 10;
@@ -65,13 +61,17 @@ export default function SpinPage() {
     setSpinning(true);
     setReveal(false);
     setButtonDisabled(true);
+    setShowStaticRewards(false); // Hide static rewards on spin
 
+    // Ensure containerRef.current is available
     const container = containerRef.current;
-    const rotations = Math.floor(Math.random() * 3) + 5;
-    const selectedReward = getRandomReward();
-    setSelectedReward(selectedReward.label);
+    if (!container) return; // Exit early if container is null
 
-    const targetIndex = rewards.findIndex((reward) => reward.label === selectedReward.label);
+    const rotations = Math.floor(Math.random() * 3) + 5;
+    const reward = getRandomReward();
+    setSelectedReward(reward.label);
+
+    const targetIndex = rewards.findIndex((r) => r.label === reward.label);
     const targetPosition = targetIndex * totalItemWidth;
     const totalDistance = rotations * rewards.length * totalItemWidth + targetPosition - centerPointerOffset;
 
@@ -81,12 +81,20 @@ export default function SpinPage() {
     setTimeout(() => {
       setSpinning(false);
       setReveal(true);
+      setButtonDisabled(false);
+
       const resetPosition = targetPosition - centerPointerOffset;
+
+      // Reset the wheel position instantly (no animation)
       setTimeout(() => {
         container.style.transition = "none";
         container.style.transform = `translateX(-${resetPosition}px)`;
-      }, resetDelay);
 
+        // Show the static rewards AFTER reset is applied
+        setShowStaticRewards(true);
+      }, resetDelay); // Wait until after the spinning animation ends
+
+      // Optionally disable spin for 60 seconds (for cooldown)
       setTimeout(() => setButtonDisabled(false), 60000);
     }, 5000);
   };
@@ -95,17 +103,18 @@ export default function SpinPage() {
     const items = [];
     for (let set = 0; set < 10; set++) {
       rewards.forEach((reward, idx) => {
+        const typeColor = reward.type === "legendary" ? "from-yellow-400 to-red-500" : reward.type === "rare" ? "from-blue-400 to-indigo-500" : "from-slate-500 to-slate-700";
+
         items.push(
           <div
             key={`${set}-${idx}`}
-            className="flex-shrink-0 flex items-center justify-center text-2xl font-bold text-white"
+            className={`flex-shrink-0 flex items-center justify-center text-2xl font-bold text-white bg-gradient-to-br ${typeColor} backdrop-blur-md border border-white/10 shadow-inner`}
             style={{
               width: `${itemWidth}px`,
               height: "100px",
               margin: `0 ${itemMargin}px`,
-              background: idx % 2 ? "#334155" : "#1e293b",
-              borderRadius: "8px",
-              boxShadow: "inset 0 0 8px rgba(0,0,0,0.5)",
+              borderRadius: "12px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
             }}
           >
             {reward.label}
@@ -117,17 +126,14 @@ export default function SpinPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-100">
-      <h1 className="text-3xl font-bold mb-6">Spin Wheel</h1>
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-800 via-slate-900 to-black text-white">
+      <h1 className="text-4xl font-extrabold mb-6 tracking-tight text-white drop-shadow-lg">🎡 Lucky Spin</h1>
 
-      <div className="relative w-[600px] h-[120px] overflow-hidden border-4 border-yellow-400 rounded-lg bg-gray-900 shadow-xl">
-        <div className="absolute inset-0 flex items-center">
-          <div className="h-[2px] w-full bg-gray-600/50"></div>
-        </div>
-
+      <div className="relative w-[600px] h-[120px] overflow-hidden border-4 border-yellow-400 rounded-xl bg-black/40 backdrop-blur-md shadow-2xl">
+        {!spinning && showStaticRewards && <div className="absolute inset-0 flex items-center">{renderRewardItems()}</div>}
         <div
           ref={containerRef}
-          className="flex absolute left-0 h-full items-center opacity-100"
+          className="flex absolute left-0 h-full items-center opacity-50"
           style={{
             paddingLeft: `${extraPadding}px`,
             paddingRight: `${extraPadding}px`,
@@ -136,17 +142,23 @@ export default function SpinPage() {
         >
           {renderRewardItems()}
         </div>
-
-        <div className="absolute top-0 bottom-0 left-1/2 transform -translate-x-1/2 w-[4px] bg-red-500 z-10"></div>
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0 h-0 border-l-8 border-r-8 border-b-8 border-l-transparent border-r-transparent border-b-red-500"></div>
+        <div className="absolute bottom-[-20px] left-1/2 transform -translate-x-1/2">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-rose-500 to-yellow-500 animate-pulse"></div>
+        </div>
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-0 h-0 border-l-4 border-r-4 border-b-2 border-l-transparent border-r-transparent border-b-rose-500"></div>
       </div>
 
-      <button onClick={startSpin} disabled={buttonDisabled || spinning} className="mt-8 px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+      <button onClick={startSpin} disabled={buttonDisabled || spinning} className="mt-8 px-10 py-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
         {spinning ? (
           <span className="flex items-center">
             <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 
+                1.135 5.824 3 7.938l3-2.647z"
+              ></path>
             </svg>
             Spinning...
           </span>
@@ -155,7 +167,7 @@ export default function SpinPage() {
         )}
       </button>
 
-      {reveal && selectedReward && <div className="mt-6 p-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xl font-bold rounded-lg animate-pulse">🎉 You won: {selectedReward} 🎉</div>}
+      {reveal && selectedReward && <div className="mt-6 px-6 py-4 bg-gradient-to-r from-green-400 to-lime-500 text-white text-xl font-bold rounded-lg shadow-lg animate-pulse border border-white/20">🎉 You won: {selectedReward} 🎉</div>}
     </div>
   );
 }
