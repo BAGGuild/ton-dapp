@@ -23,21 +23,29 @@ export async function GET(request) {
           (
             SELECT COALESCE(SUM(u2.total_points), 0)
             FROM jsonb_array_elements(u.referrals) AS r(rid)
-            JOIN users u2 ON u2.id = (r.rid)::int
+            JOIN users u2 ON u2.id = CASE 
+              WHEN jsonb_typeof(r.rid) = 'number' THEN (r.rid)::int 
+              WHEN jsonb_typeof(r.rid) = 'string' AND (r.rid)::text ~ '^[0-9]+$' THEN (r.rid)::text::int
+              ELSE NULL 
+            END
           ) AS l1_points_sum,
           (COALESCE(u.total_points, 0) + (0.1 * (
             SELECT COALESCE(SUM(u2.total_points), 0)
             FROM jsonb_array_elements(u.referrals) AS r(rid)
-            JOIN users u2 ON u2.id = (r.rid)::int
+            JOIN users u2 ON u2.id = CASE 
+              WHEN jsonb_typeof(r.rid) = 'number' THEN (r.rid)::int 
+              WHEN jsonb_typeof(r.rid) = 'string' AND (r.rid)::text ~ '^[0-9]+$' THEN (r.rid)::text::int
+              ELSE NULL 
+            END
           ))) AS combinedPoints
         FROM users u
       ),
       ranked AS (
         SELECT
           row_number() OVER (ORDER BY combinedPoints DESC) AS ranking,
-          user_points,
-          (0.1 * l1_points_sum) AS referralPoints,
-          combinedPoints,
+          FLOOR(user_points) AS user_points,
+          FLOOR(0.1 * l1_points_sum) AS referralPoints,
+          FLOOR(combinedPoints) AS combinedPoints,
           l1_count,
           username,
           photo_url
