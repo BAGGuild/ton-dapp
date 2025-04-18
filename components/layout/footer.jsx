@@ -11,7 +11,7 @@ const menuItems = [
   { name: "Home", path: "/", icon: <IoHomeOutline size={24} /> },
   { name: "Leaders", path: "/leaderboard", icon: <AiOutlineTrophy size={24} /> },
   // { name: "Earn", path: "/tasks", icon: <PiCoinsThin size={24} /> },
-  { name: "Spin", path: "/Spin", icon: <CiGift size={24} /> },
+  // { name: "Spin", path: "/Spin", icon: <CiGift size={24} /> },
   { name: "Profile", path: "/profile", icon: <AiOutlineUser size={24} /> },
 ];
 
