@@ -1,10 +1,11 @@
-import pool from '../../../../utils/db.js';
+import pool from '../../../../utils/db';
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const query = 'SELECT * FROM tasks';
+
+    const query = 'SELECT * FROM tasks ORDER BY type, id';
     const result = await pool.query(query);
 
     return new Response(JSON.stringify(result.rows), {
